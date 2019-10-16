@@ -9,10 +9,11 @@ class LoginController{
 
     async postRegister(req,res){
         
-        let username = "Hoaidien1";
-        let password = "123456";
+        let username = req.body.username || "username";
+        let password = req.body.password || "123456";
+        let name = req.body.name || "MyName"
         res.setHeader('Content-Type', 'application/json');
-        if(!await model.isExistsUser(username) && await model.createNewUser(username,password)){
+        if(!await model.isExistsUser(username) && await model.createNewUser(username,password,name)){
             res.statusCode = 200;
             return res.send({
                 status: "Create User Successful",
@@ -27,13 +28,16 @@ class LoginController{
     }
 
     async postLogin(req,res){
-        let username = "Hoaidien1";
-        let password = "123456";
+        let username = req.body.username || "";
+        let password = req.body.password || "";
         res.setHeader('Content-Type', 'application/json');
-        let user = !await model.isLoginSuccess(username)
+        let user = await model.isLoginSuccess(username,password)
         if(user){
             res.statusCode = 200;
-            const token = jwt.sign(user, 'your_jwt_secret');
+            const token = jwt.sign({
+                username: username,
+                name : user.name
+              }, 'hoaidienPA', { expiresIn: '1h' });
             return res.send({
                 status: "Login Success",
                 username: username,
@@ -48,7 +52,9 @@ class LoginController{
     }
 
     async getUserInfo(req,res){
-        
+        res.setHeader('Content-Type', 'application/json');
+        res.statusCode = 200;
+        return res.send(req.dataUsers);
         
     }
 }

@@ -11,8 +11,8 @@ class Model{
         });
     }
 
-    async createNewUser(username,password){
-        var user = { username: username, password: password, createdAt: Date.now()};
+    async createNewUser(username,password,name){
+        var user = { username: username, password: password,name: name, createdAt: Date.now()};
         let res = await dbo.collection("users").insertOne(user);
         if(res){
             return true;
@@ -32,6 +32,7 @@ class Model{
     async isLoginSuccess(username,password){
         var query = { username: username, password: password};
         let res = await dbo.collection("users").findOne(query);
+
         return res;
     }
 }  
