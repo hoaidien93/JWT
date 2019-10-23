@@ -23,9 +23,7 @@ class Model{
 
     async isExistsUser(username){
         let query = {username: username};
-
         let res = await dbo.collection("users").findOne(query);
-        console.log(res);
         return res;
     }
     
