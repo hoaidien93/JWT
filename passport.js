@@ -7,10 +7,12 @@ const ExtractJWT = passportJWT.ExtractJwt;
 
 verifyToken = function(req,res,next){
     let authorization = req.headers.authorization || "";
+    console.log(authorization);
     authorization = authorization.split(" ");
     let jwtFromRequest = authorization[1];
     jwt.verify(jwtFromRequest,secretOrKey,function(err,data){
         if(err){
+            console.log(err);
             res.setHeader('Content-Type', 'application/json');
             res.statusCode = 500;
             return res.send({

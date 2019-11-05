@@ -33,6 +33,13 @@ class LoginController{
         res.setHeader('Content-Type', 'application/json');
         let user = await model.isLoginSuccess(username,password)
         if(user){
+            let userInfo = {
+                username: user.username,
+                name: user.name,
+                avatar: user.avatar || "default.png",
+                gender: user.gender || "",
+                dateOfBirth : user.dateOfBirth
+            }
             res.statusCode = 200;
             const token = jwt.sign({
                 username: username,
@@ -41,6 +48,7 @@ class LoginController{
             return res.send({
                 status: "Login Success",
                 username: username,
+                userInfo: userInfo,
                 token: token
             });
         }
@@ -56,6 +64,43 @@ class LoginController{
         res.statusCode = 200;
         return res.send(req.dataUsers);
         
+    }
+
+    async updateUserInfo(req,res){
+        let username = req.dataUsers.username; 
+        let result = await model.updateUserInfo(username,req.body);
+        res.setHeader('Content-Type', 'application/json');
+        if(result){
+            res.statusCode = 200;
+            return res.send({
+                status: "Update user info succesfully!"
+            });
+        }
+        res.statusCode = 500;
+        return res.send({
+            status: "Update user info failed!"
+        });
+    }
+
+    async updateImage(req,res){
+        res.setHeader('Content-Type', 'application/json');
+        if(req.files.length > 0){
+            let username = req.dataUsers.username;
+            let path = "users-upload/"+req.files[0].filename;
+            console.log(path);
+            let result = await model.changeAvatar(username,path);
+            if(result){
+                res.statusCode = 200;
+                return res.send({
+                    status: "Update avatar succesfully!",
+                    pathAvatar: path 
+                });
+            }
+        }
+        res.statusCode = 500;
+        return res.send({
+            status: "Change avatar failed"
+        });
     }
 }
 

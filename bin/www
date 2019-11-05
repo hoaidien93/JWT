@@ -12,7 +12,7 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '3001');
 app.set('port', port);
 
 /**
@@ -20,7 +20,40 @@ app.set('port', port);
  */
 
 var server = http.createServer(app);
+let clientsWaiting = undefined;
+let mapPlaying = [];
+var io = require('socket.io')(server);
+io.on('connection', function (socket) {
+  console.log(socket.conn.id)
+  socket.on('register', (data) => {
+    if (!clientsWaiting) {
+      clientsWaiting = {
+        username: data.username,
+        socketId: data.socketId
+      };
+    }else{
+      let objMatch = {
+        player1_username: clientsWaiting.username,
+        player1_id : clientsWaiting.socketId,
+        player2_username: data.username,
+        player2_id : data.socketId,
+      };
+      mapPlaying.push(objMatch);
+      // Emit found
 
+      io.sockets.in(clientsWaiting.socketId).emit("Founded",objMatch);
+      io.sockets.in(data.socketId).emit("Founded",objMatch);
+
+      console.log(mapPlaying);
+      clientsWaiting = undefined;
+    }
+  })
+
+  socket.on("sendMessage",(data)=>{
+    console.log(data);
+    io.sockets.in(data.to).emit("newMessage",{message: data.message});
+  })
+});
 /**
  * Listen on provided port, on all network interfaces.
  */
