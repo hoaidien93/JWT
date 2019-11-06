@@ -24,35 +24,52 @@ let clientsWaiting = undefined;
 let mapPlaying = [];
 var io = require('socket.io')(server);
 io.on('connection', function (socket) {
-  console.log(socket.conn.id)
   socket.on('register', (data) => {
     if (!clientsWaiting) {
       clientsWaiting = {
         username: data.username,
         socketId: data.socketId
       };
-    }else{
+    } else {
       let objMatch = {
         player1_username: clientsWaiting.username,
-        player1_id : clientsWaiting.socketId,
+        player1_id: clientsWaiting.socketId,
         player2_username: data.username,
-        player2_id : data.socketId,
+        player2_id: data.socketId,
       };
       mapPlaying.push(objMatch);
       // Emit found
 
-      io.sockets.in(clientsWaiting.socketId).emit("Founded",objMatch);
-      io.sockets.in(data.socketId).emit("Founded",objMatch);
+      io.sockets.in(clientsWaiting.socketId).emit("Founded", objMatch);
+      io.sockets.in(data.socketId).emit("Founded", objMatch);
 
       console.log(mapPlaying);
       clientsWaiting = undefined;
     }
   })
 
-  socket.on("sendMessage",(data)=>{
+  socket.on("sendMessage", (data) => {
     console.log(data);
-    io.sockets.in(data.to).emit("newMessage",{message: data.message});
+    io.sockets.in(data.to).emit("newMessage", { message: data.message });
+  });
+
+  socket.on("sendClick", (data) => {
+    console.log(data);
+    io.sockets.in(data.to).emit("newClick", {
+      position: {
+        row: data.position.row,
+        column: data.position.column
+      }
+    });
   })
+
+  socket.on('disconnect', function () {
+    if (!clientsWaiting) {
+      if (clientsWaiting.socketId === socket.conn.id) {
+        clientsWaiting = undefined;
+      }
+    }
+  });
 });
 /**
  * Listen on provided port, on all network interfaces.
