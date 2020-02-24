@@ -13,6 +13,7 @@ class LoginController{
         let password = req.body.password || "123456";
         let name = req.body.name || "MyName"
         res.setHeader('Content-Type', 'application/json');
+		res.setHeader("Access-Control-Allow-Origin", "*"); 
         if(!await model.isExistsUser(username) && await model.createNewUser(username,password,name)){
             res.statusCode = 200;
             return res.send({
@@ -21,6 +22,7 @@ class LoginController{
             });
         }
         res.statusCode = 500;
+		
         return res.send({
             status: "Create User Fail",
             Info: "Username is exists"
@@ -31,6 +33,7 @@ class LoginController{
         let username = req.body.username || "";
         let password = req.body.password || "";
         res.setHeader('Content-Type', 'application/json');
+		res.setHeader("Access-Control-Allow-Origin", "*");
         let user = await model.isLoginSuccess(username,password)
         if(user){
             let userInfo = {
